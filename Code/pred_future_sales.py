@@ -22,12 +22,19 @@ laglist = list(range(1, 13))
 ignorecols = ['ID', 'item_cnt_day', 'period','item_price']
 targetcol = 'item_cnt_day'
 
+params = {
+    'Model' : 'GradientBoostingRegressor',
+    'Lags'  : laglist
+}
+
+
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Adding Item Category',
+    'description' : 'Adding Item Category - saving params and feature imp',
     'benchmark' : 1,
-    'parentID' : 9
+    'parentID' : 9,
+    'params' : params
 }
 
 print(flowargs)
@@ -35,6 +42,10 @@ print(flowargs)
 flow = DeepFlow(**flowargs)
 
 filename = f"exp_{flow.dfcurrentrun.ExpID[0]}.csv"
+
+imppath = f'Artefacts/exp_{flow.dfcurrentrun.ExpID[0]}'
+
+print(filename)
 
 # ### Reading all input data
 df_train = pd.read_csv(f'{ip}/sales_train.csv')
@@ -189,14 +200,15 @@ print(f"Holdout error : {holdouterror}")
 
 flow.log_score('RMSE', holdouterror, 4)
 
-# print("Permuting for feature importance")
-# ### Save permutation importance
-# imp = pd.DataFrame({
-#     'features': df_train.drop(columns=ignorecols).columns,
-#     'importance':permutation_importance(pipe, X=df_holdout.drop(columns=ignorecols), y=df_holdout[targetcol].values, scoring='neg_root_mean_squared_error', n_jobs=-1, n_repeats=1).importances_mean
-# })
-# imp = imp.sort_values(by=['importance'], ascending=False)
-# imp.to_csv('importance.csv', index=False)
+print("Permuting for feature importance")
+### Save permutation importance
+imp = pd.DataFrame({
+    'Features': df_holdout.drop(columns=ignorecols).columns,
+    'Importance':permutation_importance(pipe, X=df_holdout.drop(columns=ignorecols), y=df_holdout[targetcol].values, scoring='neg_root_mean_squared_error', n_jobs=-1, n_repeats=1).importances_mean
+})
+imp = imp.sort_values(by=['Importance'], ascending=False)
+
+flow.log_imp(imp, imppath)
 
 ### Submit submission using terminal if current score better than parent holdout score
 ### then enter the score here for tracking
