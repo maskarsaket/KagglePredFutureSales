@@ -11,7 +11,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 # from lightgbm import LGBMRegressor
 
 from joblib import Parallel, delayed
-
+from rfpimp import importances
 from DeepFlow.deepflow import DeepFlow
 
 ### define params
@@ -202,11 +202,11 @@ flow.log_score('RMSE', holdouterror, 4)
 
 print("Permuting for feature importance")
 ### Save permutation importance
-imp = pd.DataFrame({
-    'Features': df_holdout.drop(columns=ignorecols).columns,
-    'Importance':permutation_importance(pipe, X=df_holdout.drop(columns=ignorecols), y=df_holdout[targetcol].values, scoring='neg_root_mean_squared_error', n_jobs=-1, n_repeats=1).importances_mean
-})
-imp = imp.sort_values(by=['Importance'], ascending=False)
+imp = importances(
+    pipe, 
+    df_holdout.drop(columns=ignorecols),
+    df_holdout[targetcol]
+).reset_index()
 
 flow.log_imp(imp, imppath)
 
