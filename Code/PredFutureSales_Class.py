@@ -15,6 +15,7 @@ def createlag(data, col, lag, groupcols):
 
 class PredFutureSales():
     def __init__(self, params, flowargs):
+        self.rundesc = flowargs['description']
         self.flow = DeepFlow(**flowargs)
         self.filename = f"exp_{self.flow.dfcurrentrun.ExpID[0]}.csv"
         self.imppath = f'../Artefacts/exp_{self.flow.dfcurrentrun.ExpID[0]}'
@@ -224,7 +225,7 @@ class PredFutureSales():
             print(f"submission file : {self.params['op']+self.filename}")
 
             print(f"Run following command on terminal in submissions folder : ")
-            print(f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {filename} -m '{flowargs['description']}'")
+            print(f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {filename} -m '{self.rundesc}'")
 
             print("Kaggle score ,press enter if you dont want to submit :")
             ### add multiple scores support to DeepFlow
