@@ -123,7 +123,8 @@ class PredFutureSales():
         rawfeatures = pd.concat([rawfeatures, self.df_test], axis=0, sort=False)
         rawfeatures.item_cnt_day.fillna(0, inplace=True)
 
-        self.rawfeatures = rawfeatures
+        self.rawfeatures = rawfeatures.copy()
+        del rawfeatures
 
     def addprice(self):
         """
@@ -145,14 +146,12 @@ class PredFutureSales():
         for col in self.params['categoricalcols']:
             self.rawfeatures[col] = self.rawfeatures[col].astype('category')
 
-    def _bagofwords(self, data, colname, idcol):
+    def _bagofwords(self, df, colname, idcol, min_df=3):
         """
         Applies bag of words to the specified column
         and concats with the id cols
         """
-        df = data.copy()
-
-        vectorizer = CountVectorizer()
+        vectorizer = CountVectorizer(min_df=min_df)
         X = vectorizer.fit_transform(df[colname])
         bow = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names())
         df = pd.concat([df[idcol], bow], axis=1)
