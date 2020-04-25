@@ -219,7 +219,7 @@ class PredFutureSales():
         """
         trainstart = self.params['trainstart']
         holdoutstart = self.params['holdstart']
-        scores = []
+        scores = {}
         dfimp = pd.DataFrame(columns=['Holdout', 'Feature', 'Importance'])
 
         for fold in range(1, folds+1):
@@ -236,8 +236,8 @@ class PredFutureSales():
 
             y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
             score = self._score(pred, y_valid)
-            scores.append(score)
             print(f"\nRMSE : {score}")
+            scores[(fold, holdoutstart)] = score
 
             print("\nCalculating feature importance")
             imp = self._permutationimportance()
@@ -246,6 +246,7 @@ class PredFutureSales():
 
             holdoutstart = addmonth(holdoutstart, shift)
 
+        self.flow.log_param("Holdout Scores", scores)
         self.flow.log_score("Average RMSE", np.mean(scores))
         self.flow.log_imp(dfimp, self.imppath)
 
