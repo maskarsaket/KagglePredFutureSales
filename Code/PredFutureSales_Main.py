@@ -8,5 +8,6 @@ if __name__ == "__main__":
     PFS.featurepreprocessing()
     PFS.featureengineering()
     PFS.holdoutrunner(folds=params['folds'], shift=params['holdoutshift'])
-    # PFS.kagglesubmit()
+    PFS.finalize()
+    PFS.kagglesubmit()
     PFS.endrun()

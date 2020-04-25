@@ -156,22 +156,23 @@ class PredFutureSales():
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
             print(f"Created lag {lag}")
     
-    def _timeseriessplit(self, trainstart='201301', holdoutstart='201510', holdoutmonths = 1):
+    def _timeseriessplit(self, trainstart='201301', holdoutstart='201511', holdoutmonths = 1, final=False):
         """
         Does a time series split of the data
         1. Train set will consist of data in range [trainstart, holdoutstart)
         2. Holdout set will consist of data in range [holdoutstart,  holdoutstart + holdoutmonths)
         3. Test set is in month 201511
         """
-        holdoutend = addmonth(holdoutstart, holdoutmonths)
-
         print(f"Train Start : {trainstart}") 
-        print(f"Holdout Start : {holdoutstart}")
-        print(f"Holdout End : {holdoutend}")
-
         self.df_train = self.rawfeatures[(self.rawfeatures.period >= trainstart) & (self.rawfeatures.period < holdoutstart)]
-        self.df_holdout = self.rawfeatures[(self.rawfeatures.period >= holdoutstart) & (self.rawfeatures.period < holdoutend)]
-        self.df_test = self.rawfeatures[self.rawfeatures.period=='201511']
+
+        if not final:
+            holdoutend = addmonth(holdoutstart, holdoutmonths)
+            self.df_holdout = self.rawfeatures[(self.rawfeatures.period >= holdoutstart) & (self.rawfeatures.period < holdoutend)]
+
+            print(f"Holdout Start : {holdoutstart}")
+            print(f"Holdout End : {holdoutend}")
+
 
     def _train(self):
         """
@@ -180,13 +181,11 @@ class PredFutureSales():
         X_train = self.df_train.drop(columns=self.params['ignorecols'])
         y_train = self.df_train[self.params['targetcol']]
 
-        print("Training Model")
         self.params['Pipeline'].fit(X_train, y_train)
 
     def _predict(self):
         X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
         
-        print("Predicting")
         return np.expm1(self.params['Pipeline'].predict(X_valid))
 
     def _score(self, pred, actuals):
@@ -245,8 +244,12 @@ class PredFutureSales():
 
             holdoutstart = addmonth(holdoutstart, shift)
 
-        self.flow.log_score("RMSE", np.mean(scores))
+        self.flow.log_score("Average RMSE", np.mean(scores))
         self.flow.log_imp(dfimp, self.imppath)
+
+    def finalize(self):
+        self._timeseriessplit(trainstart=self.params['trainstart'], final=True)
+        self._train()
 
     def kagglesubmit(self):
         """
@@ -258,10 +261,12 @@ class PredFutureSales():
         print("Submit to kaggle? : Y/N")
 
         if input().lower() == 'y':
-            X_test = self.df_test.drop(columns=self.params['ignorecols'])
-            self.df_test['item_cnt_month'] = np.expm1(self.params['Pipeline'].predict(X_test))
+            df_test = self.rawfeatures[self.rawfeatures.period=='201511']
+            X_test = df_test.drop(columns=self.params['ignorecols'])
 
-            submission = self.df_test.loc[: , ['ID', 'item_cnt_month']]
+            df_test['item_cnt_month'] = np.expm1(self.params['Pipeline']._predict(X_test))
+
+            submission = df_test.loc[: , ['ID', 'item_cnt_month']]
 
             submission['item_cnt_month'] = submission['item_cnt_month'].apply(lambda x: 0 if x<0 else (20 if x>20 else x))
 
