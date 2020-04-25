@@ -7,7 +7,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.inspection import permutation_importance
-from lightgbm import LGBMRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+# from lightgbm import LGBMRegressor
 
 from joblib import Parallel, delayed
 
@@ -24,9 +25,9 @@ targetcol = 'item_cnt_day'
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'using sales since 2014 fixed',
+    'description' : 'Trying Gradient Boosting Regressor',
     'benchmark' : 1,
-    'parentID' : 6
+    'parentID' : 8
 }
 
 print(flowargs)
@@ -173,7 +174,7 @@ print(df_holdout.head(2))
 del rawfeatures
 
 ### Make pipeline
-pipe = make_pipeline(LGBMRegressor(n_jobs=-1, random_state=seed))
+pipe = make_pipeline(GradientBoostingRegressor())
 
 print("Fitting Model")
 pipe.fit(df_train.drop(columns=ignorecols), df_train[targetcol])
