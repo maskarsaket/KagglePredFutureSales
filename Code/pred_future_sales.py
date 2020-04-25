@@ -17,17 +17,19 @@ from DeepFlow.deepflow import DeepFlow
 ip = '../data'
 op = '../submissions/'
 seed = 123
-laglist = list(range(1, 4))
+laglist = list(range(1, 13))
 ignorecols = ['ID', 'item_cnt_day', 'period','item_price']
 targetcol = 'item_cnt_day'
 
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Using 3 lags of sales',
+    'description' : 'using sales since 2014 fixed',
     'benchmark' : 1,
-    'parentID' : 1
+    'parentID' : 6
 }
+
+print(flowargs)
 
 flow = DeepFlow(**flowargs)
 
@@ -73,7 +75,8 @@ del df_train, trainkeys, testkeys, newkeys
 gc.collect()
 
 print("\nCreating calendar")
-years = pd.DataFrame({'Year':np.arange(2013, 2016, dtype=np.int32), 'Key':[1,1,1]})
+years = pd.DataFrame({'Year':np.arange(2013, 2016, dtype=np.int32)})
+years['Key'] = 1
 months = pd.DataFrame({'Month':np.arange(1, 13, dtype=np.int32), 'Key':np.ones(12, dtype=np.int32)})
 
 cal = pd.merge(years, months, on='Key')
@@ -144,25 +147,28 @@ print(f"Creating {laglist} lags of sales")
 print(f'Total jobs = {df_test.shape[0]}')
 
 def createlag(data, col, lag, groupcols):
-    return data[col].shift(lag).fillna(0)
+    return data.groupby(groupcols)[col].shift(lag).fillna(0).values
 
 def applyParallel(data, func, n_jobs, **kwargs):
     res = Parallel(n_jobs=n_jobs, verbose=5, batch_size=10000)(delayed(func)(group, **kwargs) for _, group in data.groupby(kwargs['groupcols']))
     return pd.concat(res).values
 
 for lag in laglist:
-    rawfeatures[f"item_cnt_day_lag{lag}"] = applyParallel(
-        func = createlag,
-        data = rawfeatures,
-        n_jobs=7,
-        groupcols = ['shop_id', 'item_id'],
-        col='item_cnt_day',
-        lag=lag)
+    rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(rawfeatures, 'item_cnt_day', lag, ['shop_id', 'item_id'])
+    print(f"Created lag {lag}")
+
+print(rawfeatures.head(2))
 
 ### time series split instead of train test split
-df_train = rawfeatures[rawfeatures.period < '201510']
+df_train = rawfeatures[(rawfeatures.period < '201510') & (rawfeatures.period >= '201401')]
 df_holdout = rawfeatures[rawfeatures.period=='201510']
 df_test = rawfeatures[rawfeatures.period=='201511']
+
+print("train set : ")
+print(df_train.head(2))
+
+print("holdout set : ")
+print(df_holdout.head(2))
 
 del rawfeatures
 
@@ -176,6 +182,7 @@ print("Predicting")
 pred = pipe.predict(df_holdout.drop(columns=ignorecols))
 
 holdouterror = np.sqrt(mean_squared_error(np.expm1(pred), np.expm1(df_holdout[targetcol])))
+print(f"Holdout error : {holdouterror}")
 
 flow.log_score('RMSE', holdouterror, 4)
 
