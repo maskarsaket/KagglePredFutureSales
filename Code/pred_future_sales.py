@@ -35,6 +35,7 @@ print(flowargs)
 flow = DeepFlow(**flowargs)
 
 filename = f"exp_{flow.dfcurrentrun.ExpID[0]}.csv"
+print(filename)
 
 # ### Reading all input data
 df_train = pd.read_csv(f'{ip}/sales_train.csv')
@@ -123,9 +124,15 @@ rawfeatures.item_cnt_day.fillna(0, inplace=True)
 
 if 'item_price' not in ignorecols:
     ### First do forward fill, then median by mkey, then overall median
+    print("Treating missing price")
     rawfeatures.groupby(['shop_id', 'item_id'])['item_price'].fillna(method='ffill', inplace=True)
+    print(f"Missing count after ffill : {rawfeatures.item_price.isna().sum}")
+    
     rawfeatures['item_price'] = rawfeatures.groupby(['shop_id', 'item_id']).transform(lambda x : x.fillna(x.median()))
+    print(f"Missing count after group wise median : {rawfeatures.item_price.isna().sum}")
+    
     rawfeatures['item_price'] = rawfeatures['itemprice'].fillna(rawfeatures['itemprice'].median())
+    print(f"Missing count after overall median : {rawfeatures.item_price.isna().sum}")
 
     # res = Parallel(n_jobs=-1, verbose=5)(delayed(ffillparallel)(group) for _, group in rawfeatures.groupby(['shop_id', 'item_id']))
     # rawfeatures = pd.concat(res)
