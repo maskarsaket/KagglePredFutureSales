@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from rfpimp import importances
 from sklearn.metrics import mean_squared_error
+from sklearn.feature_extraction.text import CountVectorizer
 
 from DeepFlow.deepflow import DeepFlow
 
@@ -45,7 +46,7 @@ class PredFutureSales():
         ip = self.params['ip']
         self.df_train = pd.read_csv(f'{ip}/sales_train.csv')
         self.df_items = pd.read_csv(f'{ip}/items.csv')
-        # df_shops = pd.read_csv(f'{ip}/shops.csv')
+        self.df_shops = pd.read_csv(f'{ip}/shops.csv')
         # df_itemcat = pd.read_csv(f'{ip}/item_categories.csv')
         self.df_test = pd.read_csv(f'{ip}/test.csv')
 
@@ -144,11 +145,26 @@ class PredFutureSales():
         for col in self.params['categoricalcols']:
             self.rawfeatures[col] = self.rawfeatures[col].astype('category')
 
+    def _bagofwords(self, data, colname, idcol):
+        """
+        Applies bag of words to the specified column
+        and concats with the id cols
+        """
+        df = data.copy()
+
+        vectorizer = CountVectorizer()
+        X = vectorizer.fit_transform(df[colname])
+        bow = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names())
+        df = pd.concat([df[idcol], bow], axis=1)
+
+        return df
+
     def featureengineering(self):
         """
         This function does the following feature engineering
         1. Create lags of sales as specified in params
         2. Create interaction shopid_category_id feature
+        3. Adds bag of words for shops
         """        
         print(f"Creating {self.params['laglist']} lags of sales")
 
@@ -157,7 +173,13 @@ class PredFutureSales():
 
         print("Creating shop_categoryid interaction")
         self.rawfeatures['shop_category'] = [f"{i}_{j}" for i, j in zip(self.rawfeatures.shop_id, self.rawfeatures.item_category_id)]
-        
+
+        print("Adding bag of words")
+        shops_bow = self._bagofwords(self.df_shops, colname='shop_name_en', idcol='shop_id') 
+        self.rawfeatures = pd.merge(self.rawfeatures, shops_bow, on='shop_id', how='left')
+
+        print(f"raw features shape after feature engineering : {self.rawfeatures.shape}")
+        print(f"any missing cols? : {self.rawfeatures.columns[self.rawfeatures.isnull().any()].tolist()}")
     
     def _timeseriessplit(self, trainstart='201301', holdoutstart='201511', holdoutmonths = 1, final=False):
         """

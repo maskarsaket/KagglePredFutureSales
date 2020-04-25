@@ -25,8 +25,8 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Added shop_category interaction',
+    'description' : 'Bag of words - shop names',
     'benchmark' : 1,
-    'parentID' : 16,
+    'parentID' : 17,
     'params' : params
 }
