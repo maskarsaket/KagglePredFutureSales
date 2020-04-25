@@ -46,7 +46,7 @@ class PredFutureSales():
         ip = self.params['ip']
         self.df_train = pd.read_csv(f'{ip}/sales_train.csv')
         self.df_items = pd.read_csv(f'{ip}/items.csv')
-        self.df_shops = pd.read_csv(f'{ip}/shops.csv')
+        self.df_shops = pd.read_csv(f'{ip}/shops_en.csv')
         # df_itemcat = pd.read_csv(f'{ip}/item_categories.csv')
         self.df_test = pd.read_csv(f'{ip}/test.csv')
 
