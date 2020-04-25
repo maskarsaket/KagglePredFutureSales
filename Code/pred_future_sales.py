@@ -19,15 +19,15 @@ ip = '../data'
 op = '../submissions/'
 seed = 123
 laglist = list(range(1, 13))
-ignorecols = ['ID', 'item_cnt_day', 'period','item_price']
+ignorecols = ['ID', 'item_cnt_day', 'period']
 targetcol = 'item_cnt_day'
 
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Trying Gradient Boosting Regressor',
+    'description' : 'Including Price',
     'benchmark' : 1,
-    'parentID' : 8
+    'parentID' : 9
 }
 
 print(flowargs)
@@ -122,22 +122,22 @@ rawfeatures = pd.concat([rawfeatures, df_test], axis=0, sort=False)
 rawfeatures.item_cnt_day.fillna(0, inplace=True)
 
 if 'item_price' not in ignorecols:
-    def ffillparallel(data):
-        df = data.copy()
-        df['item_price'].fillna(method='ffill', inplace=True)
-        return df
+    ### First do forward fill, then median by mkey, then overall median
+    rawfeatures.groupby(['shop_id', 'item_id'])['item_price'].fillna(method='ffill', inplace=True)
+    rawfeatures['item_price'] = rawfeatures.groupby(['shop_id', 'item_id']).transform(lambda x : x.fillna(x.median()))
+    rawfeatures['item_price'] = rawfeatures['itemprice'].fillna(rawfeatures['itemprice'].median())
 
-    res = Parallel(n_jobs=-1, verbose=5)(delayed(ffillparallel)(group) for _, group in rawfeatures.groupby(['shop_id', 'item_id']))
-    rawfeatures = pd.concat(res)
-    del res
+    # res = Parallel(n_jobs=-1, verbose=5)(delayed(ffillparallel)(group) for _, group in rawfeatures.groupby(['shop_id', 'item_id']))
+    # rawfeatures = pd.concat(res)
+    # del res
 
 ### define categorical features
 cat_feat = ['shop_id', 'item_id', 'Year', 'Month']
 numeric_cols = ['item_price', 'item_cnt_day']
 
 ### Log transform and clip sales before creating lags
+rawfeatures['item_cnt_day'] = rawfeatures['item_cnt_day'].apply(lambda x : 0 if x<0 else (20 if x>20 else x))
 for col in numeric_cols:
-    rawfeatures[col] = rawfeatures[col].apply(lambda x : 0 if x<0 else (20 if x>20 else x))
     rawfeatures[col] = np.log1p(rawfeatures[col])
 
 for col in cat_feat:
