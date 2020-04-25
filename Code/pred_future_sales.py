@@ -25,9 +25,9 @@ targetcol = 'item_cnt_day'
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Trying Gradient Boosting Regressor',
+    'description' : 'Adding Item Category',
     'benchmark' : 1,
-    'parentID' : 8
+    'parentID' : 9
 }
 
 print(flowargs)
@@ -38,7 +38,7 @@ filename = f"exp_{flow.dfcurrentrun.ExpID[0]}.csv"
 
 # ### Reading all input data
 df_train = pd.read_csv(f'{ip}/sales_train.csv')
-# df_items = pd.read_csv(f'{ip}/items.csv')
+df_items = pd.read_csv(f'{ip}/items.csv')
 # df_shops = pd.read_csv(f'{ip}/shops.csv')
 # df_itemcat = pd.read_csv(f'{ip}/item_categories.csv')
 
@@ -46,7 +46,7 @@ df_test = pd.read_csv(f'{ip}/test.csv')
 
 print(f'\ntrain shape : {df_train.shape}')
 print(f'test shape : {df_test.shape}')
-# print(f'items shape : {df_items.shape}')
+print(f'items shape : {df_items.shape}')
 # print(f'shops shape : {df_shops.shape}')
 # print(f'categories shape : {df_itemcat.shape}')
 
@@ -88,6 +88,8 @@ print("Creating Raw Features")
 del years, months
 
 df_test['Key'] = 1
+df_test = pd.merge(df_test, df_items[['item_id', 'item_category_id']], on='item_id', how='left')
+print(f"Missing item categories : {df_test.item_category_id.isna().sum()}")
 
 calxkeys = pd.merge(df_test, cal, on='Key')
 
@@ -132,7 +134,7 @@ if 'item_price' not in ignorecols:
     del res
 
 ### define categorical features
-cat_feat = ['shop_id', 'item_id', 'Year', 'Month']
+cat_feat = ['shop_id', 'item_id', 'Year', 'Month', 'item_category_id']
 numeric_cols = ['item_price', 'item_cnt_day']
 
 ### Log transform and clip sales before creating lags
