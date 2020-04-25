@@ -232,7 +232,6 @@ class PredFutureSales():
 
             y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
             score = self._score(pred, y_valid)
-            scores.append(score)
             print(f"RMSE : {score}")
             scores[(fold, holdoutstart)] = score
 
@@ -244,7 +243,7 @@ class PredFutureSales():
             holdoutstart = addmonth(holdoutstart, shift)
 
         self.flow.log_param("Holdout Scores", scores)
-        self.flow.log_score("Average RMSE", np.mean(scores.values()))
+        self.flow.log_score("Average RMSE", np.mean(list(scores.values())))
         self.flow.log_imp(dfimp, self.imppath)
 
     def _finalize(self):
