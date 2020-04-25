@@ -12,6 +12,21 @@ from DeepFlow.deepflow import DeepFlow
 def createlag(data, col, lag, groupcols):
     return data.groupby(groupcols)[col].shift(lag).fillna(0).values
 
+def addmonth(period, months):
+    """
+    Add, subtract months from a period in YYYYMM format
+    """
+    pdate = datetime.strptime(period, '%Y%m')
+    ryear = pdate.year
+
+    rmonth = pdate.month + months
+    if rmonth > 12:
+        rmonth -= 12
+        ryear += 1
+
+    return f"{ryear}{str(rmonth).zfill(2)}"
+
+
 class PredFutureSales():
     def __init__(self, params, flowargs):
         self.params = params
@@ -141,61 +156,47 @@ class PredFutureSales():
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
             print(f"Created lag {lag}")
     
-    def timeseriessplit(self, trainstart='201301', holdoutstart='201510', holdoutmonths = 1):
+    def _timeseriessplit(self, trainstart='201301', holdoutstart='201510', holdoutmonths = 1):
         """
         Does a time series split of the data
         1. Train set will consist of data in range [trainstart, holdoutstart)
         2. Holdout set will consist of data in range [holdoutstart,  holdoutstart + holdoutmonths)
         3. Test set is in month 201511
         """
+        holdoutend = addmonth(holdoutstart, holdoutmonths)
+
+        print(f"Train Start : {trainstart}") 
+        print(f"Holdout Start : {holdoutstart}")
+        print(f"Holdout End : {holdoutend}")
+
         self.df_train = self.rawfeatures[(self.rawfeatures.period >= trainstart) & (self.rawfeatures.period < holdoutstart)]
-
-        ### find holdout end month
-        holdstartdate = datetime.strptime(holdoutstart, '%Y%m')
-        holdendyear = holdstartdate.year
-
-        holdendmonth = holdstartdate.month + holdoutmonths
-        if holdendmonth > 12:
-            holdendmonth-= 12
-            holdendyear += 1
-
-        holdoutend = f"{holdendyear}{str(holdendmonth).zfill(2)}" 
-
         self.df_holdout = self.rawfeatures[(self.rawfeatures.period >= holdoutstart) & (self.rawfeatures.period < holdoutend)]
-        
         self.df_test = self.rawfeatures[self.rawfeatures.period=='201511']
 
-        del self.rawfeatures
-
-    def train(self):
+    def _train(self):
         """
         Trains model on the train set and evaluates accuracy of holdout set
         """
         X_train = self.df_train.drop(columns=self.params['ignorecols'])
         y_train = self.df_train[self.params['targetcol']]
 
-        X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
-        y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
-
         print("Training Model")
         self.params['Pipeline'].fit(X_train, y_train)
 
-        print("Predicting")        
-        pred = np.expm1(self.params['Pipeline'].predict(X_valid))
-
-        holdouterror = np.sqrt(mean_squared_error(pred, y_valid))
+    def _predict(self):
+        X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
         
-        print(f"Holdout error : {holdouterror}")
+        print("Predicting")
+        return np.expm1(self.params['Pipeline'].predict(X_valid))
 
-        self.flow.log_score('RMSE', holdouterror, 4)
+    def _score(self, pred, actuals):
+        return np.sqrt(mean_squared_error(pred, actuals))        
 
-    def permutationimportance(self):
+    def _permutationimportance(self):
         """
         Finds the permutation importance and saves the importance.csv file
         in the Artefacts/exp_num folder
         """
-        print("Permuting for feature importance")
-        ### Save permutation importance
         X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
         y_valid = self.df_holdout[self.params['targetcol']]
 
@@ -208,7 +209,44 @@ class PredFutureSales():
         ### sum of importances should sum to 1
         imp['Importance'] = imp['Importance']/sum(imp['Importance'])
 
-        self.flow.log_imp(imp, self.imppath)
+        return imp
+
+    def holdoutrunner(self, folds = 5, shift = 1):
+        """
+        This function runs n-holdouts in time series fashion
+        shifting the holdout period by shift months
+        """
+        trainstart = self.params['trainstart']
+        holdoutstart = self.params['holdstart']
+        scores = []
+        dfimp = pd.DataFrame(columns=['Holdout', 'Feature', 'Importance'])
+
+        for fold in range(1, folds+1):
+            print(f"Fold {fold}:{folds}")
+
+            print("Time Series Split")
+            self._timeseriessplit(trainstart=trainstart, holdoutstart=holdoutstart, holdoutmonths=self.params['holdoutmonths'])
+            
+            print(f"Training")
+            self._train()
+            
+            print(f"Predicting")
+            pred = self._predict()
+
+            y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
+            score = self._score(pred, y_valid)
+            scores.append(score)
+            print(f"RMSE : {score}")
+
+            print("Calculating feature importance")
+            imp = self._permutationimportance()
+            imp['Holdout'] = fold
+            dfimp = pd.concat([dfimp, imp], axis=0)
+
+            holdoutstart = addmonth(holdoutstart, shift)
+
+        self.flow.log_score("RMSE", np.mean(scores))
+        self.flow.log_imp(dfimp, self.imppath)
 
     def kagglesubmit(self):
         """

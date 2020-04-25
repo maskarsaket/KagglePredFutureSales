@@ -8,6 +8,11 @@ params = {
     'ip' : '../data',
     'op' : '../submissions/',
     'seed' : 123,
+    'trainstart' : '201401',
+    'holdstart' : '201506',
+    'folds' : 5, ### No of holdout runs to trigger
+    'holdoutmonths' : 1, ### No of months per holdout
+    'holdoutshift' : 1, ### Shift holdout by months
     'laglist' : list(range(1, 13)),
     'mkey_cols' : ['shop_id', 'item_id'],
     'categoricalcols' : ['shop_id', 'item_id', 'Year', 'Month', 'item_category_id'],
@@ -20,8 +25,8 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Standardized code',
+    'description' : 'Run 5 holdouts',
     'benchmark' : 1,
-    'parentID' : 13,
+    'parentID' : 14,
     'params' : params
 }
