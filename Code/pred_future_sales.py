@@ -43,7 +43,7 @@ flow = DeepFlow(**flowargs)
 
 filename = f"exp_{flow.dfcurrentrun.ExpID[0]}.csv"
 
-imppath = f'Artefacts/exp_{flow.dfcurrentrun.ExpID[0]}'
+imppath = f'../Artefacts/exp_{flow.dfcurrentrun.ExpID[0]}'
 
 print(filename)
 
@@ -207,6 +207,9 @@ imp = importances(
     df_holdout.drop(columns=ignorecols),
     df_holdout[targetcol]
 ).reset_index()
+
+### sum of importances should sum to 1
+imp['Importance'] = imp['Importance']/sum(imp['Importance'])
 
 flow.log_imp(imp, imppath)
 
