@@ -20,6 +20,8 @@ class PredFutureSales():
         self.filename = f"exp_{self.flow.dfcurrentrun.ExpID[0]}.csv"
         self.imppath = f'../Artefacts/exp_{self.flow.dfcurrentrun.ExpID[0]}'
 
+        print(f"Starting Experiment {self.flow.dfcurrentrun.ExpID[0]}")
+
     def readdata(self):
         """
         This function reads all the input data from the 
@@ -139,7 +141,7 @@ class PredFutureSales():
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
             print(f"Created lag {lag}")
     
-    def timeseriessplit(self, trainstart='201301', holdoutstart='201510', holdoutmonths = 5):
+    def timeseriessplit(self, trainstart='201301', holdoutstart='201510', holdoutmonths = 1):
         """
         Does a time series split of the data
         1. Train set will consist of data in range [trainstart, holdoutstart)
@@ -194,10 +196,13 @@ class PredFutureSales():
         """
         print("Permuting for feature importance")
         ### Save permutation importance
+        X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
+        y_valid = self.df_holdout[self.params['targetcol']]
+
         imp = importances(
             self.params['Pipeline'], 
-            df_holdout.drop(columns=self.params['Pipeline']),
-            df_holdout[self.params['targetcol']]
+            X_valid,
+            y_valid
         ).reset_index()
 
         ### sum of importances should sum to 1
@@ -226,7 +231,7 @@ class PredFutureSales():
             print(f"submission file : {self.params['op']+self.filename}")
 
             print(f"Run following command on terminal in submissions folder : ")
-            print(f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {filename} -m '{self.rundesc}'")
+            print(f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {self.filename} -m '{self.rundesc}'")
 
             print("Kaggle score ,press enter if you dont want to submit :")
             ### add multiple scores support to DeepFlow

@@ -7,7 +7,7 @@ if __name__ == "__main__":
     PFS.createrawfeatures()
     PFS.featurepreprocessing()
     PFS.featureengineering()
-    PFS.timeseriessplit()
+    PFS.timeseriessplit(trainstart='201401')
     PFS.train()
     PFS.permutationimportance()
     PFS.kagglesubmit()
