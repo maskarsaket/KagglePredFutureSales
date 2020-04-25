@@ -154,7 +154,6 @@ class PredFutureSales():
 
         for lag in self.params['laglist']:
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
-            print(f"Created lag {lag}")
     
     def _timeseriessplit(self, trainstart='201301', holdoutstart='201511', holdoutmonths = 1, final=False):
         """
@@ -183,10 +182,9 @@ class PredFutureSales():
 
         self.params['Pipeline'].fit(X_train, y_train)
 
-    def _predict(self):
-        X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
-        
-        return np.expm1(self.params['Pipeline'].predict(X_valid))
+    def _predict(self, X):
+        X = X.drop(columns=self.params['ignorecols'])
+        return np.expm1(self.params['Pipeline'].predict(X))
 
     def _score(self, pred, actuals):
         return np.sqrt(mean_squared_error(pred, actuals))        
@@ -230,7 +228,7 @@ class PredFutureSales():
             self._train()
             
             print(f"Predicting")
-            pred = self._predict()
+            pred = self._predict(self.df_holdout)
 
             y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
             score = self._score(pred, y_valid)
@@ -247,7 +245,7 @@ class PredFutureSales():
         self.flow.log_score("Average RMSE", np.mean(scores))
         self.flow.log_imp(dfimp, self.imppath)
 
-    def finalize(self):
+    def _finalize(self):
         self._timeseriessplit(trainstart=self.params['trainstart'], final=True)
         self._train()
 
@@ -261,10 +259,11 @@ class PredFutureSales():
         print("Submit to kaggle? : Y/N")
 
         if input().lower() == 'y':
-            df_test = self.rawfeatures[self.rawfeatures.period=='201511']
-            X_test = df_test.drop(columns=self.params['ignorecols'])
+            self._finalize()
 
-            df_test['item_cnt_month'] = np.expm1(self.params['Pipeline']._predict(X_test))
+            df_test = self.rawfeatures[self.rawfeatures.period=='201511']
+
+            df_test['item_cnt_month'] = self._predict(df_test)
 
             submission = df_test.loc[: , ['ID', 'item_cnt_month']]
 
