@@ -6,6 +6,7 @@ import gc
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.preprocessing import OneHotEncoder
 
 from joblib import Parallel, delayed
 from rfpimp import importances
@@ -16,7 +17,7 @@ ip = '../data'
 op = '../submissions/'
 seed = 123
 laglist = list(range(1, 13))
-ignorecols = ['ID', 'item_cnt_day', 'period','item_price']
+ignorecols = ['ID', 'item_cnt_day', 'period','item_price', 'item_id']
 targetcol = 'item_cnt_day'
 
 params = {
@@ -28,9 +29,9 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Adding Item Category - saving params and feature imp',
+    'description' : 'One hot encode categories - drop itemid',
     'benchmark' : 1,
-    'parentID' : 9,
+    'parentID' : 12,
     'params' : params
 }
 
@@ -184,7 +185,7 @@ print(df_holdout.head(2))
 del rawfeatures
 
 ### Make pipeline
-pipe = make_pipeline(GradientBoostingRegressor())
+pipe = make_pipeline(OneHotEncoder(), GradientBoostingRegressor())
 
 print("Fitting Model")
 pipe.fit(df_train.drop(columns=ignorecols), df_train[targetcol])
