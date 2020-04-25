@@ -1,4 +1,3 @@
-import gc
 import os
 from datetime import datetime, timedelta
 
@@ -15,6 +14,7 @@ def createlag(data, col, lag, groupcols):
 
 class PredFutureSales():
     def __init__(self, params, flowargs):
+        self.params = params
         self.rundesc = flowargs['description']
         self.flow = DeepFlow(**flowargs)
         self.filename = f"exp_{self.flow.dfcurrentrun.ExpID[0]}.csv"
@@ -52,7 +52,6 @@ class PredFutureSales():
         })
 
         del self.df_train
-        gc.collect()
 
         print("\nCreating calendar")
         
@@ -69,14 +68,16 @@ class PredFutureSales():
 
         print("Creating Raw Features")
 
-        df_test['Key'] = 1
-        df_test = pd.merge(df_test, df_items[['item_id', 'item_category_id']], on='item_id', how='left')
-        print(f"Missing item categories : {df_test.item_category_id.isna().sum()}")
+        self.df_test['Key'] = 1
+        self.df_test = pd.merge(self.df_test, self.df_items[['item_id', 'item_category_id']], on='item_id', how='left')
+        print(f"Missing item categories : {self.df_test.item_category_id.isna().sum()}")
 
-        calxkeys = pd.merge(df_test, cal, on='Key')
+        del self.df_items
+
+        calxkeys = pd.merge(self.df_test, cal, on='Key')
 
         calxkeys.drop(columns='Key', inplace=True)
-        df_test.drop(columns='Key', inplace=True)
+        self.df_test.drop(columns='Key', inplace=True)
 
         rawfeatures = pd.merge(calxkeys, df_trainm,
                             on=groupcols, how='left')
@@ -95,13 +96,13 @@ class PredFutureSales():
         rawfeatures.drop(columns='minperiod', inplace=True)
 
         print("Defining vaiables for test set and concatting with rawfeatures to create lags")
-        df_test['period'] = '201511'
-        df_test['Year'] = 2015
-        df_test['Month'] = 11
-        df_test['item_cnt_day'] = 0
-        df_test['item_price'] = np.NaN
+        self.df_test['period'] = '201511'
+        self.df_test['Year'] = 2015
+        self.df_test['Month'] = 11
+        self.df_test['item_cnt_day'] = 0
+        self.df_test['item_price'] = np.NaN
 
-        rawfeatures = pd.concat([rawfeatures, df_test], axis=0, sort=False)
+        rawfeatures = pd.concat([rawfeatures, self.df_test], axis=0, sort=False)
         rawfeatures.item_cnt_day.fillna(0, inplace=True)
 
         self.rawfeatures = rawfeatures
@@ -145,7 +146,7 @@ class PredFutureSales():
         2. Holdout set will consist of data in range [holdoutstart,  holdoutstart + holdoutmonths)
         3. Test set is in month 201511
         """
-        self.df_train = self.rawfeatures[(rawfeatures.period >= trainstart) & (self.rawfeatures.period < holdoutstart)]
+        self.df_train = self.rawfeatures[(self.rawfeatures.period >= trainstart) & (self.rawfeatures.period < holdoutstart)]
 
         ### find holdout end month
         holdstartdate = datetime.strptime(holdoutstart, '%Y%m')
@@ -158,7 +159,7 @@ class PredFutureSales():
 
         holdoutend = f"{holdendyear}{str(holdendmonth).zfill(2)}" 
 
-        self.df_holdout = self.rawfeatures[(self.rawfeatures.period >= holdoutstart) & (self.rawfeatures.period) < holdoutend]
+        self.df_holdout = self.rawfeatures[(self.rawfeatures.period >= holdoutstart) & (self.rawfeatures.period < holdoutend)]
         
         self.df_test = self.rawfeatures[self.rawfeatures.period=='201511']
 
@@ -172,7 +173,7 @@ class PredFutureSales():
         y_train = self.df_train[self.params['targetcol']]
 
         X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
-        y_valid = np.expm1(df_holdout[self.params['targetcol']])
+        y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
 
         print("Training Model")
         self.params['Pipeline'].fit(X_train, y_train)
