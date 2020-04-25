@@ -148,12 +148,16 @@ class PredFutureSales():
         """
         This function does the following feature engineering
         1. Create lags of sales as specified in params
+        2. Create interaction shopid_category_id feature
         """        
-        ### Creating lags of sales
         print(f"Creating {self.params['laglist']} lags of sales")
 
         for lag in self.params['laglist']:
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
+
+        print("Creating shop_categoryid interaction")
+        self.rawfeatures['shop_category'] = [f"{i}_{j}" for i, j in zip(self.rawfeatures.shop_id, self.rawfeatures.item_category_id)]
+        
     
     def _timeseriessplit(self, trainstart='201301', holdoutstart='201511', holdoutmonths = 1, final=False):
         """
@@ -219,23 +223,23 @@ class PredFutureSales():
         dfimp = pd.DataFrame(columns=['Holdout', 'Feature', 'Importance'])
 
         for fold in range(1, folds+1):
-            print(f"Fold {fold}:{folds}")
+            print(f"\nFold {fold}:{folds}")
 
-            print("Time Series Split")
+            print("\nTime Series Split")
             self._timeseriessplit(trainstart=trainstart, holdoutstart=holdoutstart, holdoutmonths=self.params['holdoutmonths'])
             
-            print(f"Training")
+            print(f"\nTraining")
             self._train()
             
-            print(f"Predicting")
+            print(f"\nPredicting")
             pred = self._predict(self.df_holdout)
 
             y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
             score = self._score(pred, y_valid)
             scores.append(score)
-            print(f"RMSE : {score}")
+            print(f"\nRMSE : {score}")
 
-            print("Calculating feature importance")
+            print("\nCalculating feature importance")
             imp = self._permutationimportance()
             imp['Holdout'] = fold
             dfimp = pd.concat([dfimp, imp], axis=0)
@@ -275,7 +279,7 @@ class PredFutureSales():
             print(f"Run following command on terminal in submissions folder : ")
             print(f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {self.filename} -m '{self.rundesc}'")
 
-            print("Kaggle score ,press enter if you dont want to submit :")
+            # print("Kaggle score ,press enter if you dont want to submit :")
             ### add multiple scores support to DeepFlow
         else:
             print("We'll submit the next run")
