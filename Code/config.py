@@ -8,7 +8,7 @@ params = {
     'ip' : '../data',
     'op' : '../submissions/',
     'seed' : 123,
-    'trainstart' : '201401',
+    'trainstart' : '201301',
     'holdstart' : '201506',
     'folds' : 5, ### No of holdout runs to trigger
     'holdoutmonths' : 1, ### No of months per holdout
@@ -25,8 +25,8 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Bag of words - shop names',
+    'description' : 'Use entire history',
     'benchmark' : 1,
-    'parentID' : 17,
+    'parentID' : 18,
     'params' : params
 }
