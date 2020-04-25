@@ -185,7 +185,7 @@ print(df_holdout.head(2))
 del rawfeatures
 
 ### Make pipeline
-pipe = make_pipeline(OneHotEncoder(), GradientBoostingRegressor())
+pipe = make_pipeline(OneHotEncoder(handle_unknown='ignore'), GradientBoostingRegressor())
 
 print("Fitting Model")
 pipe.fit(df_train.drop(columns=ignorecols), df_train[targetcol])
