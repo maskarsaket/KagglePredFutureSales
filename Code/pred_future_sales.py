@@ -17,15 +17,16 @@ from DeepFlow.deepflow import DeepFlow
 ip = '../data'
 op = '../submissions/'
 seed = 123
-laglist = list(range(1, 2))
+laglist = list(range(1, 4))
 ignorecols = ['ID', 'item_cnt_day', 'period','item_price']
 targetcol = 'item_cnt_day'
 
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'First Experiment',
-    'benchmark' : 1
+    'description' : 'Using 3 lags of sales',
+    'benchmark' : 1,
+    'parentID' : 1
 }
 
 flow = DeepFlow(**flowargs)
