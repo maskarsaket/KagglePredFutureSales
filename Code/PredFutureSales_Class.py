@@ -154,7 +154,7 @@ class PredFutureSales():
         vectorizer = CountVectorizer(min_df=min_df)
         X = vectorizer.fit_transform(df[colname])
         cols = [f"{colname}_{i}" for i in vectorizer.get_feature_names()]
-        bow = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names())
+        bow = pd.DataFrame(X.toarray(), columns=cols)
         df = pd.concat([df[idcol], bow], axis=1)
 
         return df
