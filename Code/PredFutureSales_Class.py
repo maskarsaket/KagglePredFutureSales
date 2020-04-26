@@ -171,6 +171,7 @@ class PredFutureSales():
         2. Create interaction shopid_category_id feature
         3. Adds bag of words for shops
         4. Adds bag of words for categories
+        5. Adds days since last sales
         """        
         print(f"Creating {self.params['laglist']} lags of sales")
 
@@ -187,6 +188,20 @@ class PredFutureSales():
         print("Adding bag of words for categories")
         categories_bow = self._bagofwords(self.df_itemcat, colname='item_category_name_en', idcol='item_category_id') 
         self.rawfeatures = pd.merge(self.rawfeatures, categories_bow, on='item_category_id', how='left')
+
+        print("Adding days since last sales")
+        dfnonzerosales = self.rawfeatures[self.rawfeatures['item_cnt_day'] > 0]['shop_id', 'item_id', 'period']
+        dfnonzerosales.rename(columns={'period':'lastsaleperiod'}, inplace=True)
+        self.rawfeatures = pd.merge(self.rawfeatures, dfnonzerosales, on=self.params['mkey_cols'], how='left')
+        self.rawfeatures['lastsaleperiod'].fillna(method='ffill', inplace=True)
+        self.rawfeatures['lastsaleperiod'].fillna(0, inplace=True)
+        self.rawfeatures['lastsaleperiod'] = createlag(self.rawfeatures, 'lastsaleperiod', 1, self.params['mkey_cols'])
+        self.rawfeatures['months_since_sale'] = [0 if j==0 else 12*(int(i[:4]) - int(j[:4])) + (int(i[-2:]) - int(j[-2:])) 
+            for i, j in zip(self.rawfeatures['period'], self.rawfeatures['lastsaleperiod'])]
+
+        print(self.rawfeatures[['shop_id', 'item_id', 'period', 'lastsaleperiod', 'months_since_sale']].sample(20))
+        
+        self.rawfeatures.drop(columns='lastsaleperiod', inplace=True)
 
         print(f"raw features shape after feature engineering : {self.rawfeatures.shape}")
         print(f"any missing cols? : {self.rawfeatures.columns[self.rawfeatures.isnull().any()].tolist()}")
