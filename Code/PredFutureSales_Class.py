@@ -151,10 +151,15 @@ class PredFutureSales():
         Applies bag of words to the specified column
         and concats with the id cols
         """
-        vectorizer = CountVectorizer(min_df=min_df)
+        vectorizer = CountVectorizer(min_df=min_df, ngram_range=(1, 2))
         X = vectorizer.fit_transform(df[colname])
-        cols = [f"{colname}_{i}" for i in vectorizer.get_feature_names()]
-        bow = pd.DataFrame(X.toarray(), columns=cols)
+
+        bow = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names()).T
+        bow['ngram'] = [len(i.split()) for i in bow.index]
+        bow = bow.sort_values(by='ngram', ascending=False)
+        bow = bow.drop(columns='ngram').drop_duplicates().T
+        bow.columns = [f"{colname}_{i}" for i in bow.columns]
+
         df = pd.concat([df[idcol], bow], axis=1)
 
         return df
