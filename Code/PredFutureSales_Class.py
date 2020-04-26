@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from rfpimp import importances
 from sklearn.metrics import mean_squared_error
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from DeepFlow import DeepFlow
 
@@ -151,7 +151,7 @@ class PredFutureSales():
         Applies bag of words to the specified column
         and concats with the id cols
         """
-        vectorizer = CountVectorizer(min_df=min_df, ngram_range=(1, 2))
+        vectorizer = TfidfVectorizer(min_df=min_df, ngram_range=(1, 2))
         X = vectorizer.fit_transform(df[colname])
 
         bow = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names()).T

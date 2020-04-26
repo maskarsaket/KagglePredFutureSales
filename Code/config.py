@@ -25,8 +25,8 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Added bigrams and removed duplicate columns',
+    'description' : 'TFiDF instead of BagOfWords',
     'benchmark' : 1,
-    'parentID' : 21,
+    'parentID' : 24,
     'params' : params
 }
