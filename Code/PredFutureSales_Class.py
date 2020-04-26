@@ -190,10 +190,9 @@ class PredFutureSales():
         self.rawfeatures = pd.merge(self.rawfeatures, categories_bow, on='item_category_id', how='left')
 
         print("Adding days since last sales")
-        dfnonzerosales = self.rawfeatures[self.rawfeatures['item_cnt_day'] > 0][['shop_id', 'item_id', 'period']]
-        dfnonzerosales.rename(columns={'period':'lastsaleperiod'}, inplace=True)
-        self.rawfeatures = pd.merge(self.rawfeatures, dfnonzerosales, on=self.params['mkey_cols'], how='left')
-        self.rawfeatures['lastsaleperiod'].fillna(method='ffill', inplace=True)
+        self.rawfeatures['lastsaleperiod'] = [np.NaN if j==0 else i
+            for i, j in zip(self.rawfeatures['period'], self.rawfeatures['item_cnt_day'])]
+        self.rawfeatures['lastsaleperiod'] = self.rawfeatures.groupby(self.params['mkey_cols'])['lastsaleperiod'].fillna(method='ffill')
         self.rawfeatures['lastsaleperiod'].fillna(0, inplace=True)
         self.rawfeatures['lastsaleperiod'] = createlag(self.rawfeatures, 'lastsaleperiod', 1, self.params['mkey_cols'])
         self.rawfeatures['months_since_sale'] = [0 if j==0 else 12*(int(i[:4]) - int(j[:4])) + (int(i[-2:]) - int(j[-2:])) 
