@@ -47,7 +47,7 @@ class PredFutureSales():
         self.df_train = pd.read_csv(f'{ip}/sales_train.csv')
         self.df_items = pd.read_csv(f'{ip}/items.csv')
         self.df_shops = pd.read_csv(f'{ip}/shops_en.csv')
-        # df_itemcat = pd.read_csv(f'{ip}/item_categories.csv')
+        self.df_itemcat = pd.read_csv(f'{ip}/item_categories_en.csv')
         self.df_test = pd.read_csv(f'{ip}/test.csv')
 
     def createrawfeatures(self):
@@ -164,6 +164,7 @@ class PredFutureSales():
         1. Create lags of sales as specified in params
         2. Create interaction shopid_category_id feature
         3. Adds bag of words for shops
+        4. Adds bag of words for categories
         """        
         print(f"Creating {self.params['laglist']} lags of sales")
 
@@ -173,9 +174,13 @@ class PredFutureSales():
         print("Creating shop_categoryid interaction")
         self.rawfeatures['shop_category'] = [f"{i}_{j}" for i, j in zip(self.rawfeatures.shop_id, self.rawfeatures.item_category_id)]
 
-        print("Adding bag of words")
+        print("Adding bag of words for shops")
         shops_bow = self._bagofwords(self.df_shops, colname='shop_name_en', idcol='shop_id') 
         self.rawfeatures = pd.merge(self.rawfeatures, shops_bow, on='shop_id', how='left')
+
+        print("Adding bag of words for categories")
+        categories_bow = self._bagofwords(self.df_itemcat, colname='item_category_name_en', idcol='item_category_id') 
+        self.rawfeatures = pd.merge(self.rawfeatures, categories_bow, on='item_category_id', how='left')
 
         print(f"raw features shape after feature engineering : {self.rawfeatures.shape}")
         print(f"any missing cols? : {self.rawfeatures.columns[self.rawfeatures.isnull().any()].tolist()}")
