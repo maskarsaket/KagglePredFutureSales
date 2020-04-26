@@ -7,7 +7,7 @@ from rfpimp import importances
 from sklearn.metrics import mean_squared_error
 from sklearn.feature_extraction.text import CountVectorizer
 
-from DeepFlow.deepflow import DeepFlow
+from DeepFlow import DeepFlow
 
 
 def createlag(data, col, lag, groupcols):
