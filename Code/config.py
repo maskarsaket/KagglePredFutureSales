@@ -13,7 +13,7 @@ params = {
     'folds' : 5, ### No of holdout runs to trigger
     'holdoutmonths' : 1, ### No of months per holdout
     'holdoutshift' : 1, ### Shift holdout by months
-    'laglist' : list(range(1, 2)),
+    'laglist' : list(),
     'mkey_cols' : ['shop_id', 'item_id'],
     'categoricalcols' : ['shop_id', 'item_id', 'Year', 'Month', 'item_category_id'],
     'numericcols' : ['item_price', 'item_cnt_day'],
@@ -25,7 +25,7 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Using only 1 lag of sales',
+    'description' : 'No lags of sales',
     'benchmark' : 1,
     'parentID' : 21,
     'params' : params
