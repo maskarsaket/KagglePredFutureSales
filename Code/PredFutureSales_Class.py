@@ -325,8 +325,11 @@ class PredFutureSales():
             submission.to_csv(self.params['op']+self.filename, index=False)
             print(f"submission file : {self.params['op']+self.filename}")
 
-            print(f"Run following command on terminal in submissions folder : ")
-            print(f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {self.filename} -m '{self.rundesc}'")
+            print(f"Submitting prediction to kaggle : ")
+            command = f"kaggle competitions submit -c competitive-data-science-predict-future-sales -f {self.filename} -m '{self.rundesc}'"
+
+            os.chdir(self.params['op'])
+            os.system(command)
 
             # print("Kaggle score ,press enter if you dont want to submit :")
             ### add multiple scores support to DeepFlow

@@ -25,8 +25,8 @@ params = {
 flowargs = {
     'projectname' : 'Kaggle - predict future sales',
     'runmasterfile' : '../runmaster.csv',
-    'description' : 'Added days since last sale',
+    'description' : 'Passing pipeline as string - and submitting directly to kaggle',
     'benchmark' : 1,
-    'parentID' : 24,
+    'parentID' : 27,
     'params' : params
 }
