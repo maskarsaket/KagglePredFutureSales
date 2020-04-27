@@ -178,7 +178,7 @@ class PredFutureSales():
         """        
         print(f"Creating {self.params['laglist']} lags of sales")
 
-        for lag in self.params['laglist']:
+        for lag in eval(self.params['laglist']):
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
 
         print("Creating shop_categoryid interaction")
