@@ -3,9 +3,12 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
+from lightgbm import LGBMRegressor
 from rfpimp import importances
-from sklearn.metrics import mean_squared_error
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import mean_squared_error
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import OneHotEncoder
 
 from DeepFlow import DeepFlow
 

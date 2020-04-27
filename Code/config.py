@@ -1,7 +1,3 @@
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import OneHotEncoder
-from lightgbm import LGBMRegressor
-
 ### define params
 params = {
     'Pipeline' : "make_pipeline(OneHotEncoder(handle_unknown='ignore'), LGBMRegressor(n_jobs=-1))",
