@@ -230,11 +230,13 @@ class PredFutureSales():
         X_train = self.df_train.drop(columns=self.params['ignorecols'])
         y_train = self.df_train[self.params['targetcol']]
 
-        self.params['Pipeline'].fit(X_train, y_train)
+        self.pipeline = eval(self.params['Pipeline'])
+
+        self.pipeline.fit(X_train, y_train)
 
     def _predict(self, X):
         X = X.drop(columns=self.params['ignorecols'])
-        return np.expm1(self.params['Pipeline'].predict(X))
+        return np.expm1(self.pipeline.predict(X))
 
     def _score(self, pred, actuals):
         return np.sqrt(mean_squared_error(pred, actuals))        
@@ -248,7 +250,7 @@ class PredFutureSales():
         y_valid = self.df_holdout[self.params['targetcol']]
 
         imp = importances(
-            self.params['Pipeline'], 
+            self.pipeline, 
             X_valid,
             y_valid
         ).reset_index()
