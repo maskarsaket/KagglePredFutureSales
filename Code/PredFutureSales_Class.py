@@ -39,6 +39,8 @@ class PredFutureSales():
         self.filename = f"exp_{self.flow.dfcurrentrun.ExpID[0]}.csv"
         self.imppath = f'../Artefacts/exp_{self.flow.dfcurrentrun.ExpID[0]}'
 
+        self.mkeycols = eval(self.params['mkey_cols'])
+
         print(f"Starting Experiment {self.flow.dfcurrentrun.ExpID[0]}")
 
     def readdata(self):
@@ -106,9 +108,9 @@ class PredFutureSales():
         del calxkeys
 
         print("Removing rows for sales before first point of sales per mkey")
-        dfmin = df_trainm.groupby(self.params['mkey_cols'], as_index=False).agg({'period':'min'}).rename(columns={'period':'minperiod'})
+        dfmin = df_trainm.groupby(self.mkeycols, as_index=False).agg({'period':'min'}).rename(columns={'period':'minperiod'})
 
-        rawfeatures = pd.merge(rawfeatures, dfmin, on=self.params['mkey_cols'], how='left')
+        rawfeatures = pd.merge(rawfeatures, dfmin, on=self.mkeycols, how='left')
 
         del dfmin
 
@@ -142,11 +144,11 @@ class PredFutureSales():
         2. Performs log transform of sales
         3. Converts categorical columns to type category
         """
-        for col in self.params['numericcols']:
+        for col in eval(self.params['numericcols']):
             self.rawfeatures[col] = self.rawfeatures[col].apply(lambda x : 0 if x<0 else (20 if x>20 else x))
             self.rawfeatures[col] = np.log1p(self.rawfeatures[col])
 
-        for col in self.params['categoricalcols']:
+        for col in eval(self.params['categoricalcols']):
             self.rawfeatures[col] = self.rawfeatures[col].astype('category')
 
     def _bagofwords(self, df, colname, idcol, min_df=3):
@@ -179,7 +181,7 @@ class PredFutureSales():
         print(f"Creating {self.params['laglist']} lags of sales")
 
         for lag in eval(self.params['laglist']):
-            self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.params['mkey_cols'])
+            self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.mkeycols)
 
         print("Creating shop_categoryid interaction")
         self.rawfeatures['shop_category'] = [f"{i}_{j}" for i, j in zip(self.rawfeatures.shop_id, self.rawfeatures.item_category_id)]
@@ -195,9 +197,9 @@ class PredFutureSales():
         print("Adding days since last sales")
         self.rawfeatures['lastsaleperiod'] = [np.NaN if j==0 else i
             for i, j in zip(self.rawfeatures['period'], self.rawfeatures['item_cnt_day'])]
-        self.rawfeatures['lastsaleperiod'] = self.rawfeatures.groupby(self.params['mkey_cols'])['lastsaleperiod'].fillna(method='ffill')
+        self.rawfeatures['lastsaleperiod'] = self.rawfeatures.groupby(self.mkeycols)['lastsaleperiod'].fillna(method='ffill')
         self.rawfeatures['lastsaleperiod'].fillna(0, inplace=True)
-        self.rawfeatures['lastsaleperiod'] = createlag(self.rawfeatures, 'lastsaleperiod', 1, self.params['mkey_cols'])
+        self.rawfeatures['lastsaleperiod'] = createlag(self.rawfeatures, 'lastsaleperiod', 1, self.mkeycols)
         self.rawfeatures['months_since_sale'] = [0 if j==0 else 12*(int(i[:4]) - int(j[:4])) + (int(i[-2:]) - int(j[-2:])) 
             for i, j in zip(self.rawfeatures['period'], self.rawfeatures['lastsaleperiod'])]
 
@@ -230,7 +232,7 @@ class PredFutureSales():
         """
         Trains model on the train set and evaluates accuracy of holdout set
         """
-        X_train = self.df_train.drop(columns=self.params['ignorecols'])
+        X_train = self.df_train.drop(columns=eval(self.params['ignorecols']))
         y_train = self.df_train[self.params['targetcol']]
 
         self.pipeline = eval(self.params['Pipeline'])
@@ -238,7 +240,7 @@ class PredFutureSales():
         self.pipeline.fit(X_train, y_train)
 
     def _predict(self, X):
-        X = X.drop(columns=self.params['ignorecols'])
+        X = X.drop(columns=eval(self.params['ignorecols']))
         return np.expm1(self.pipeline.predict(X))
 
     def _score(self, pred, actuals):
@@ -249,7 +251,7 @@ class PredFutureSales():
         Finds the permutation importance and saves the importance.csv file
         in the Artefacts/exp_num folder
         """
-        X_valid = self.df_holdout.drop(columns=self.params['ignorecols'])
+        X_valid = self.df_holdout.drop(columns=eval(self.params['ignorecols']))
         y_valid = self.df_holdout[self.params['targetcol']]
 
         imp = importances(
