@@ -16,6 +16,9 @@ from DeepFlow import DeepFlow
 def createlag(data, col, lag, groupcols):
     return data.groupby(groupcols)[col].shift(lag).fillna(0).values
 
+def createrollingmean(data, col, window, groupbycols):
+    return data.groupby(groupbycols)[col].rolling(window).mean().fillna(0).values
+
 def addmonth(period, months):
     """
     Add, subtract months from a period in YYYYMM format
@@ -177,6 +180,7 @@ class PredFutureSales():
         3. Adds bag of words for shops
         4. Adds bag of words for categories
         5. Adds days since last sales
+        6. Create Rolling mean features
         """        
         print(f"Creating {self.params['laglist']} lags of sales")
 
@@ -203,7 +207,11 @@ class PredFutureSales():
         self.rawfeatures['months_since_sale'] = [0 if j==0 else 12*(int(i[:4]) - int(j[:4])) + (int(i[-2:]) - int(j[-2:])) 
             for i, j in zip(self.rawfeatures['period'], self.rawfeatures['lastsaleperiod'])]
 
-        print(self.rawfeatures[['shop_id', 'item_id', 'period', 'lastsaleperiod', 'months_since_sale']].sample(20))
+        print(f"Creating rolling mean features with windows {self.params['rollingwindows']}")
+        for win in eval(self.params['rollingwindows']):
+            self.rawfeatures[f'rolling_mean_{win}'] = createrollingmean(self.rawfeatures, 'item_cnt_day', win, self.mkeycols)
+
+        print(self.rawfeatures[['shop_id', 'item_id', 'period', 'item_cnt_day', 'rolling_mean_3']].head(20))
         
         self.rawfeatures.drop(columns='lastsaleperiod', inplace=True)
 
