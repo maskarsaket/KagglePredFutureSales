@@ -1,0 +1,281 @@
+Holdout,Feature,Importance
+1,item_cnt_day_lag1,0.6483444354024183
+1,item_cnt_day_lag2,0.09118312496946515
+1,item_cnt_day_lag6,0.05775337730229416
+1,item_cnt_day_lag3,0.05033560037822815
+1,shop_id,0.039807303004055564
+1,item_category_id,0.03333139204095759
+1,shop_name_en_center,0.024366583225292344
+1,item_category_name_en_games,0.017485406843066074
+1,item_category_name_en_blu ray,0.009355096843747706
+1,shop_category,0.007855197152997212
+1,item_category_name_en_books,0.007175232449637538
+1,shop_name_en_yakutsk,0.004644889750659921
+1,item_category_name_en_gifts,0.0022090833364883733
+1,shop_name_en_moscow,0.0021453781925189637
+1,item_category_name_en_payment cards,0.0019321705683148541
+1,item_category_name_en_accessories,0.0009083846370541853
+1,item_category_name_en_books audiobooks,0.000823308162642385
+1,item_category_name_en_1c,0.0006722891188555089
+1,shop_name_en_sec,0.0006463215263659896
+1,item_category_name_en_program,0.0005764632395325873
+1,item_category_name_en_ps3,0.0005501999440675977
+1,shop_name_en_shopping center,0.0005483292146798079
+1,item_category_name_en_edition,0.0003296369784581152
+1,shop_name_en_tc mega,0.0002094820815396036
+1,item_category_name_en_xbox,0.00013080817089557235
+1,shop_name_en_moscow shopping,9.6493959228031e-05
+1,item_category_name_en_music,5.638617977621248e-05
+1,shop_name_en_shopping,3.904322393353741e-05
+1,item_category_name_en_psvita,3.1549184164045896e-05
+1,shop_name_en_tk,2.17405513634397e-06
+1,item_category_name_en_cards,0.0
+1,item_category_name_en_figure,0.0
+1,Month,0.0
+1,item_category_name_en_movies,0.0
+1,item_category_name_en_payment,0.0
+1,Year,0.0
+1,item_category_name_en_pc,0.0
+1,shop_name_en_trc,0.0
+1,shop_name_en_ii,0.0
+1,shop_name_en_tc central,0.0
+1,shop_name_en_sc,0.0
+1,shop_name_en_rostovnadonu,0.0
+1,shop_name_en_mega,0.0
+1,shop_name_en_mall,0.0
+1,item_category_name_en_ps2,0.0
+1,item_category_name_en_xbox 360,-8.344715108157737e-07
+1,item_category_name_en_xbox one,-2.83831158055394e-05
+1,shop_name_en_tc,-3.137251565563187e-05
+1,item_category_name_en_game consoles,-6.849598175340545e-05
+1,item_category_name_en_psp,-0.00012717590405329998
+1,shop_name_en_tyumen,-0.00013474433504940864
+1,shop_name_en_voronezh,-0.00014450194839957158
+1,item_category_name_en_games pc,-0.0004469521663652694
+1,item_category_name_en_digital,-0.0006851648658537031
+1,shop_name_en_city,-0.0007294696860513398
+1,item_category_name_en_ps4,-0.0011480461459733562
+2,item_cnt_day_lag1,0.6204381741501217
+2,item_cnt_day_lag2,0.0914878121307709
+2,item_cnt_day_lag6,0.05105224738939674
+2,item_cnt_day_lag3,0.04775896617251767
+2,item_category_id,0.044492036983553744
+2,shop_id,0.033212912140689485
+2,item_category_name_en_games,0.027342358252636787
+2,shop_name_en_center,0.02717162018632517
+2,item_category_name_en_books,0.026502314086861354
+2,item_category_name_en_ps4,0.007999845855432591
+2,shop_category,0.006469756116762533
+2,item_category_name_en_blu ray,0.004550346911645633
+2,item_category_name_en_payment cards,0.002729858049488314
+2,shop_name_en_sec,0.002189655403982478
+2,shop_name_en_city,0.0020998553317526677
+2,item_category_name_en_gifts,0.0018497034076361304
+2,shop_name_en_yakutsk,0.0017683630863708786
+2,item_category_name_en_xbox one,0.0006663096974639435
+2,shop_name_en_voronezh,0.0006648850250341124
+2,item_category_name_en_music,0.000523508001049886
+2,item_category_name_en_program,0.0004754099901906807
+2,shop_name_en_moscow shopping,0.0003328005096971038
+2,item_category_name_en_edition,0.0002525065179475492
+2,item_category_name_en_ps3,0.0002365959895595818
+2,item_category_name_en_books audiobooks,0.00022492051808295195
+2,item_category_name_en_game consoles,7.258318074651555e-05
+2,shop_name_en_shopping center,6.466710896529654e-05
+2,item_category_name_en_xbox 360,2.8005228933857362e-05
+2,item_category_name_en_xbox,1.7590219920930756e-05
+2,shop_name_en_tc mega,4.73252849398367e-07
+2,item_category_name_en_figure,0.0
+2,Month,0.0
+2,item_category_name_en_movies,0.0
+2,item_category_name_en_pc,0.0
+2,item_category_name_en_cards,0.0
+2,Year,0.0
+2,item_category_name_en_psp,0.0
+2,shop_name_en_tyumen,0.0
+2,item_category_name_en_payment,0.0
+2,shop_name_en_mall,0.0
+2,shop_name_en_tk,0.0
+2,shop_name_en_tc,0.0
+2,shop_name_en_sc,0.0
+2,shop_name_en_trc,0.0
+2,shop_name_en_mega,0.0
+2,shop_name_en_ii,0.0
+2,shop_name_en_shopping,0.0
+2,shop_name_en_tc central,0.0
+2,item_category_name_en_ps2,0.0
+2,item_category_name_en_psvita,-1.5082370045860704e-06
+2,item_category_name_en_1c,-9.418167072051443e-05
+2,shop_name_en_rostovnadonu,-0.00015576811840950006
+2,item_category_name_en_digital,-0.0001851505648638612
+2,item_category_name_en_games pc,-0.00039320991123393737
+2,item_category_name_en_accessories,-0.0007809613457341763
+2,shop_name_en_moscow,-0.0010653010484200423
+3,item_cnt_day_lag1,0.5897047324064697
+3,item_cnt_day_lag2,0.16057772076584795
+3,item_cnt_day_lag3,0.05006081139377292
+3,item_category_name_en_books,0.04978897080565733
+3,item_cnt_day_lag6,0.03485052783338318
+3,shop_id,0.032498509068656145
+3,item_category_id,0.031590231536942764
+3,item_category_name_en_games,0.01621908322313791
+3,shop_name_en_center,0.015433101440595778
+3,item_category_name_en_blu ray,0.008494441667861197
+3,item_category_name_en_payment cards,0.00346383252194638
+3,shop_name_en_yakutsk,0.003365897823401717
+3,item_category_name_en_gifts,0.0025094217699566483
+3,shop_name_en_sec,0.0016181419727175146
+3,shop_category,0.0011968824877092786
+3,item_category_name_en_edition,0.0011428147216820893
+3,item_category_name_en_books audiobooks,0.0010054178623435002
+3,shop_name_en_moscow,0.0008907513375033169
+3,item_category_name_en_music,0.0005158099628054299
+3,item_category_name_en_xbox one,0.00021284033442958196
+3,item_category_name_en_psvita,0.00019647493955149574
+3,item_category_name_en_ps3,0.00011854348114174325
+3,shop_name_en_moscow shopping,0.00010874157729200491
+3,item_category_name_en_xbox 360,8.454094485133985e-05
+3,item_category_name_en_program,4.839919254466202e-05
+3,item_category_name_en_xbox,2.5743618050958188e-05
+3,shop_name_en_voronezh,2.5275739691150007e-05
+3,item_category_name_en_psp,0.0
+3,shop_name_en_trc,0.0
+3,item_category_name_en_payment,0.0
+3,item_category_name_en_movies,0.0
+3,Month,0.0
+3,item_category_name_en_figure,0.0
+3,shop_name_en_shopping,0.0
+3,item_category_name_en_cards,0.0
+3,Year,0.0
+3,item_category_name_en_pc,0.0
+3,item_category_name_en_ps2,0.0
+3,shop_name_en_tk,0.0
+3,shop_name_en_ii,0.0
+3,shop_name_en_sc,0.0
+3,shop_name_en_mall,0.0
+3,shop_name_en_tc central,0.0
+3,item_category_name_en_accessories,-6.556912709387166e-06
+3,shop_name_en_rostovnadonu,-2.6495352962035504e-05
+3,shop_name_en_tc mega,-5.3404944280493295e-05
+3,shop_name_en_mega,-5.6813685338850164e-05
+3,shop_name_en_tc,-0.0001258434523106315
+3,shop_name_en_tyumen,-0.00020078688150782184
+3,shop_name_en_city,-0.0002462053705423296
+3,item_category_name_en_game consoles,-0.00027898584459741445
+3,item_category_name_en_1c,-0.0004914816421956417
+3,shop_name_en_shopping center,-0.0004923233725925607
+3,item_category_name_en_digital,-0.000623751392531098
+3,item_category_name_en_ps4,-0.0008129660760705646
+3,item_category_name_en_games pc,-0.0023320455023048644
+4,item_cnt_day_lag1,0.6849558592542784
+4,item_category_name_en_books,0.07783275600582612
+4,item_cnt_day_lag2,0.07295227799080167
+4,shop_id,0.04170388957018391
+4,item_category_name_en_games,0.04024529115665998
+4,item_category_name_en_ps4,0.020587482705907843
+4,item_category_id,0.013548379913898652
+4,item_cnt_day_lag3,0.011558247857184588
+4,item_cnt_day_lag6,0.010199551324785372
+4,shop_category,0.007352022661567092
+4,item_category_name_en_payment cards,0.005485394270622866
+4,shop_name_en_center,0.003740235873492414
+4,item_category_name_en_digital,0.0030118247619781136
+4,shop_name_en_moscow,0.0021979543718808774
+4,item_category_name_en_game consoles,0.0020521559724943424
+4,shop_name_en_yakutsk,0.0020015718777862223
+4,item_category_name_en_1c,0.0014407884051561629
+4,item_category_name_en_gifts,0.001359491994277034
+4,shop_name_en_city,0.0012770937611412889
+4,item_category_name_en_games pc,0.0011209816248887463
+4,item_category_name_en_program,0.0008347660631770084
+4,item_category_name_en_music,0.00046624274898854275
+4,item_category_name_en_ps3,0.000386150144624474
+4,item_category_name_en_books audiobooks,0.00014716167344185868
+4,item_category_name_en_xbox,8.257804638545061e-05
+4,item_category_name_en_psp,3.6019780003656e-05
+4,item_category_name_en_xbox 360,1.0042312434498576e-05
+4,shop_name_en_trc,0.0
+4,item_category_name_en_movies,0.0
+4,shop_name_en_tc mega,0.0
+4,item_category_name_en_figure,0.0
+4,Month,0.0
+4,item_category_name_en_cards,0.0
+4,item_category_name_en_pc,0.0
+4,Year,0.0
+4,item_category_name_en_payment,0.0
+4,shop_name_en_tyumen,0.0
+4,shop_name_en_tc central,0.0
+4,shop_name_en_ii,0.0
+4,shop_name_en_tk,0.0
+4,shop_name_en_sc,0.0
+4,shop_name_en_mall,0.0
+4,shop_name_en_mega,0.0
+4,shop_name_en_shopping,0.0
+4,item_category_name_en_ps2,0.0
+4,shop_name_en_rostovnadonu,-3.7333003119455546e-06
+4,item_category_name_en_accessories,-4.117957122936294e-05
+4,shop_name_en_voronezh,-0.00010440402468815743
+4,item_category_name_en_edition,-0.00015487828921657948
+4,item_category_name_en_psvita,-0.0001746067261479366
+4,item_category_name_en_xbox one,-0.00041205464168748307
+4,shop_name_en_moscow shopping,-0.0007291127822890683
+4,shop_name_en_shopping center,-0.0007867379301068437
+4,shop_name_en_tc,-0.000869057252052896
+4,item_category_name_en_blu ray,-0.0016206293808730165
+4,shop_name_en_sec,-0.0016898182252638408
+5,item_cnt_day_lag1,0.5704745452378728
+5,item_cnt_day_lag2,0.09665244108374894
+5,item_category_name_en_books,0.08148090223332499
+5,shop_id,0.06161090493595484
+5,item_cnt_day_lag3,0.04843952372776771
+5,item_category_id,0.034064810551906376
+5,shop_name_en_center,0.03328775253193195
+5,item_cnt_day_lag6,0.031695135570266444
+5,item_category_name_en_games,0.011915826173797849
+5,item_category_name_en_ps4,0.010338687199053346
+5,shop_category,0.005203573180019562
+5,item_category_name_en_gifts,0.004869111842834439
+5,item_category_name_en_digital,0.0045941300929451655
+5,item_category_name_en_payment,0.004113231010336533
+5,item_category_name_en_xbox one,0.0013806479729702337
+5,item_category_name_en_program,0.001277078334829205
+5,shop_name_en_sec,0.0012506198950806664
+5,item_category_name_en_xbox,0.0009839456283216284
+5,shop_name_en_yakutsk,0.0004509839569023657
+5,item_category_name_en_music,0.0003678182443615715
+5,shop_name_en_voronezh,0.0003513818258386696
+5,item_category_name_en_edition,0.00033854700586864647
+5,item_category_name_en_psvita,0.00018475056500773316
+5,shop_name_en_city,0.00016933796825392914
+5,item_category_name_en_payment cards,0.00016820290551682404
+5,shop_name_en_moscow shopping,0.00015297543346647367
+5,shop_name_en_rostovnadonu,7.602948919322719e-05
+5,item_category_name_en_figure,0.0
+5,Month,0.0
+5,item_category_name_en_ps2,0.0
+5,item_category_name_en_cards,0.0
+5,shop_name_en_tc mega,0.0
+5,Year,0.0
+5,item_category_name_en_pc,0.0
+5,item_category_name_en_movies,0.0
+5,shop_name_en_shopping center,0.0
+5,shop_name_en_tc,0.0
+5,shop_name_en_shopping,0.0
+5,shop_name_en_trc,0.0
+5,shop_name_en_ii,0.0
+5,shop_name_en_mega,0.0
+5,shop_name_en_tc central,0.0
+5,shop_name_en_tk,0.0
+5,shop_name_en_sc,0.0
+5,item_category_name_en_game consoles,-6.525725269732664e-06
+5,item_category_name_en_xbox 360,-1.3197474746015287e-05
+5,item_category_name_en_psp,-2.302242772822096e-05
+5,shop_name_en_tyumen,-3.6309412320115985e-05
+5,shop_name_en_mall,-7.173634362140487e-05
+5,item_category_name_en_1c,-0.0001225088634866806
+5,item_category_name_en_ps3,-0.00012989170391145103
+5,item_category_name_en_books audiobooks,-0.00013563640642386195
+5,item_category_name_en_accessories,-0.0001959932002055435
+5,shop_name_en_moscow,-0.00035066162719224784
+5,item_category_name_en_games pc,-0.001757092282678606
+5,item_category_name_en_blu ray,-0.0030503191297881673
