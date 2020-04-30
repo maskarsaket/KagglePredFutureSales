@@ -17,7 +17,7 @@ def createlag(data, col, lag, groupcols):
     return data.groupby(groupcols)[col].shift(lag).fillna(0).values
 
 def createrollingmean(data, col, window, groupbycols):
-    return data.groupby(groupbycols)[col].rolling(window).mean().fillna(0).values
+    return data.groupby(groupbycols)[col].rolling(window).mean().shift(1).fillna(0).values
 
 def addmonth(period, months):
     """
