@@ -1,0 +1,11 @@
+Observations
+
+1. Data is from Jan 2013 to Oct 2015
+2. Forecast to be generated for Nov 2015
+3. Decreasing pattern in sales
+	a) number of mkeys reduces over time and almost follows the sales pattern
+4. only 5100 items per shop in test data
+5. sales peak in Dec
+6. sales lag1 is the most important feature
+7. Dropping 2013 sales helps as many mkeys which were open in 2013 are now discontinued
+8. Months since sale is an important feature, should try on other projects as well 
