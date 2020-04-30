@@ -179,7 +179,7 @@ class PredFutureSales():
         2. Create interaction shopid_category_id feature
         3. Adds bag of words for shops
         4. Adds bag of words for categories
-        5. Adds days since last sales
+        5. Adds Months since last sales
         6. Create Rolling mean features
         """        
         print(f"Creating {self.params['laglist']} lags of sales")
@@ -198,7 +198,7 @@ class PredFutureSales():
         categories_bow = self._bagofwords(self.df_itemcat, colname='item_category_name_en', idcol='item_category_id') 
         self.rawfeatures = pd.merge(self.rawfeatures, categories_bow, on='item_category_id', how='left')
 
-        print("Adding days since last sales")
+        print("Adding months since last sales")
         self.rawfeatures['lastsaleperiod'] = [np.NaN if j==0 else i
             for i, j in zip(self.rawfeatures['period'], self.rawfeatures['item_cnt_day'])]
         self.rawfeatures['lastsaleperiod'] = self.rawfeatures.groupby(self.mkeycols)['lastsaleperiod'].fillna(method='ffill')
