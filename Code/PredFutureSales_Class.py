@@ -308,7 +308,7 @@ class PredFutureSales():
             holdoutstart = addmonth(holdoutstart, shift)
 
         self.flow.log_param("Holdout Scores", scores)
-        self.flow.log_score("Average RMSE", np.mean(list(scores.values())))
+        self.flow.log_score("Error", "Average RMSE", np.mean(list(scores.values())))
         self.flow.log_imp(dfimp, self.imppath)
 
     def _finalize(self):
