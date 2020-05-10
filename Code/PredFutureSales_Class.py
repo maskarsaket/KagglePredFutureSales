@@ -48,9 +48,10 @@ class PredFutureSales():
 
     def readdata(self):
         """
-        This function reads all the input data from the 
-        input path mentioned in params 
+        This function reads all the input data from the
+        input path mentioned in params
         """
+        self.flow.log_status(logmessage="Reading Input Data")
         ip = self.params['ip']
         self.df_train = pd.read_csv(f'{ip}/sales_train.csv')
         self.df_items = pd.read_csv(f'{ip}/items.csv')
@@ -60,11 +61,11 @@ class PredFutureSales():
 
     def createrawfeatures(self):
         """
-        This function aggregates the sales to monthly level, adds data points 
+        This function aggregates the sales to monthly level, adds data points
         with zero sales for months with no sale
         """
         df_trainm = self.df_train.copy()
-        
+
         df_trainm['date'] = pd.to_datetime(df_trainm['date'], format='%d.%m.%Y')
         df_trainm['Year'] = df_trainm['date'].dt.year
         df_trainm['Month'] = df_trainm['date'].dt.month
@@ -80,7 +81,8 @@ class PredFutureSales():
         del self.df_train
 
         print("\nCreating calendar")
-        
+        self.flow.log_status(logmessage="Creating calendar")
+
         years = pd.DataFrame({'Year':np.arange(2013, 2016, dtype=np.int32)})
         years['Key'] = 1
 
@@ -93,10 +95,10 @@ class PredFutureSales():
         cal = cal[cal.period<'201511']
 
         print("Creating Raw Features")
+        self.flow.log_status(logmessage="Creating Raw Features")
 
         self.df_test['Key'] = 1
         self.df_test = pd.merge(self.df_test, self.df_items[['item_id', 'item_category_id']], on='item_id', how='left')
-        print(f"Missing item categories : {self.df_test.item_category_id.isna().sum()}")
 
         del self.df_items
 
@@ -111,6 +113,8 @@ class PredFutureSales():
         del calxkeys
 
         print("Removing rows for sales before first point of sales per mkey")
+        self.flow.log_status(logmessage="Removing rows for sales before first point of sales per mkey")
+
         dfmin = df_trainm.groupby(self.mkeycols, as_index=False).agg({'period':'min'}).rename(columns={'period':'minperiod'})
 
         rawfeatures = pd.merge(rawfeatures, dfmin, on=self.mkeycols, how='left')
@@ -122,6 +126,7 @@ class PredFutureSales():
         rawfeatures.drop(columns='minperiod', inplace=True)
 
         print("Defining vaiables for test set and concatting with rawfeatures to create lags")
+        self.flow.log_status(logmessage="Defining vaiables for test set and concatting with rawfeatures to create lags")
         self.df_test['period'] = '201511'
         self.df_test['Year'] = 2015
         self.df_test['Month'] = 11
@@ -133,6 +138,7 @@ class PredFutureSales():
 
         self.rawfeatures = rawfeatures.copy()
         del rawfeatures
+        self.flow.log_status(logmessage="Done Creating Raw Features")
 
     def addprice(self):
         """
@@ -147,10 +153,13 @@ class PredFutureSales():
         2. Performs log transform of sales
         3. Converts categorical columns to type category
         """
+        self.flow.log_status(logmessage=f"Clipping {self.params['numericcols']} values to [0,20]")
+        self.flow.log_status(logmessage=f"Taking log transform of {self.params['numericcols']}")
         for col in eval(self.params['numericcols']):
             self.rawfeatures[col] = self.rawfeatures[col].apply(lambda x : 0 if x<0 else (20 if x>20 else x))
             self.rawfeatures[col] = np.log1p(self.rawfeatures[col])
 
+        self.flow.log_status(logmessage=f"Converting {self.params['categoricalcols']} to type category")
         for col in eval(self.params['categoricalcols']):
             self.rawfeatures[col] = self.rawfeatures[col].astype('category')
 
@@ -181,43 +190,54 @@ class PredFutureSales():
         4. Adds bag of words for categories
         5. Adds Months since last sales
         6. Create Rolling mean features
-        """        
+        """
         print(f"Creating {self.params['laglist']} lags of sales")
+        self.flow.log_status(logmessage=f"Creating {self.params['laglist']} lags of sales")
 
         for lag in eval(self.params['laglist']):
             self.rawfeatures[f"item_cnt_day_lag{lag}"] = createlag(self.rawfeatures, 'item_cnt_day', lag, self.mkeycols)
 
         print("Creating shop_categoryid interaction")
+        self.flow.log_status(logmessage="Creating shop_categoryid interaction")
+
         self.rawfeatures['shop_category'] = [f"{i}_{j}" for i, j in zip(self.rawfeatures.shop_id, self.rawfeatures.item_category_id)]
 
         print("Adding bag of words for shops")
-        shops_bow = self._bagofwords(self.df_shops, colname='shop_name_en', idcol='shop_id') 
+        self.flow.log_status(logmessage="Adding bag of words for shops")
+
+        shops_bow = self._bagofwords(self.df_shops, colname='shop_name_en', idcol='shop_id')
         self.rawfeatures = pd.merge(self.rawfeatures, shops_bow, on='shop_id', how='left')
 
         print("Adding bag of words for categories")
-        categories_bow = self._bagofwords(self.df_itemcat, colname='item_category_name_en', idcol='item_category_id') 
+        self.flow.log_status(logmessage="Adding bag of words for categories")
+
+        categories_bow = self._bagofwords(self.df_itemcat, colname='item_category_name_en', idcol='item_category_id')
         self.rawfeatures = pd.merge(self.rawfeatures, categories_bow, on='item_category_id', how='left')
 
         print("Adding months since last sales")
+        self.flow.log_status(logmessage="Adding months since last sales")
+
         self.rawfeatures['lastsaleperiod'] = [np.NaN if j==0 else i
             for i, j in zip(self.rawfeatures['period'], self.rawfeatures['item_cnt_day'])]
         self.rawfeatures['lastsaleperiod'] = self.rawfeatures.groupby(self.mkeycols)['lastsaleperiod'].fillna(method='ffill')
         self.rawfeatures['lastsaleperiod'].fillna(0, inplace=True)
         self.rawfeatures['lastsaleperiod'] = createlag(self.rawfeatures, 'lastsaleperiod', 1, self.mkeycols)
-        self.rawfeatures['months_since_sale'] = [0 if j==0 else 12*(int(i[:4]) - int(j[:4])) + (int(i[-2:]) - int(j[-2:])) 
+        self.rawfeatures['months_since_sale'] = [0 if j==0 else 12*(int(i[:4]) - int(j[:4])) + (int(i[-2:]) - int(j[-2:]))
             for i, j in zip(self.rawfeatures['period'], self.rawfeatures['lastsaleperiod'])]
+        self.rawfeatures.drop(columns='lastsaleperiod', inplace=True)
 
         print(f"Creating rolling mean features with windows {self.params['rollingwindows']}")
+        self.flow.log_status(logmessage=f"Creating rolling mean features with windows {self.params['rollingwindows']}")
+
         for win in eval(self.params['rollingwindows']):
             self.rawfeatures[f'rolling_mean_{win}'] = createrollingmean(self.rawfeatures, 'item_cnt_day', win, self.mkeycols)
 
-        print(self.rawfeatures[['shop_id', 'item_id', 'period', 'item_cnt_day', 'rolling_mean_3']].head(20))
-        
-        self.rawfeatures.drop(columns='lastsaleperiod', inplace=True)
-
         print(f"raw features shape after feature engineering : {self.rawfeatures.shape}")
+        self.flow.log_status(logmessage=f"raw features shape after feature engineering : {self.rawfeatures.shape}")
+
         print(f"any missing cols? : {self.rawfeatures.columns[self.rawfeatures.isnull().any()].tolist()}")
-    
+        self.flow.log_status(logmessage=f"any missing cols? : {self.rawfeatures.columns[self.rawfeatures.isnull().any()].tolist()}")
+
     def _timeseriessplit(self, trainstart='201301', holdoutstart='201511', holdoutmonths = 1, final=False):
         """
         Does a time series split of the data
@@ -225,7 +245,7 @@ class PredFutureSales():
         2. Holdout set will consist of data in range [holdoutstart,  holdoutstart + holdoutmonths)
         3. Test set is in month 201511
         """
-        print(f"Train Start : {trainstart}") 
+        print(f"Train Start : {trainstart}")
         self.df_train = self.rawfeatures[(self.rawfeatures.period >= trainstart) & (self.rawfeatures.period < holdoutstart)]
 
         if not final:
@@ -234,7 +254,9 @@ class PredFutureSales():
 
             print(f"Holdout Start : {holdoutstart}")
             print(f"Holdout End : {holdoutend}")
-
+            self.flow.log_status(logmessage=f"Train Start : {trainstart}, Holdout Start : {holdoutstart}, Holdout End : {holdoutend}")
+        else:
+            self.flow.log_status(logmessage=f"Train Start : {trainstart}")
 
     def _train(self):
         """
@@ -252,7 +274,7 @@ class PredFutureSales():
         return np.expm1(self.pipeline.predict(X))
 
     def _score(self, pred, actuals):
-        return np.sqrt(mean_squared_error(pred, actuals))        
+        return np.sqrt(mean_squared_error(pred, actuals))
 
     def _permutationimportance(self):
         """
@@ -263,7 +285,7 @@ class PredFutureSales():
         y_valid = self.df_holdout[self.params['targetcol']]
 
         imp = importances(
-            self.pipeline, 
+            self.pipeline,
             X_valid,
             y_valid
         ).reset_index()
@@ -285,22 +307,27 @@ class PredFutureSales():
 
         for fold in range(1, folds+1):
             print(f"\nFold {fold}:{folds}")
+            self.flow.log_status(logmessage=f"Starting Fold {fold}:{folds}")
 
             print("\nTime Series Split")
             self._timeseriessplit(trainstart=trainstart, holdoutstart=holdoutstart, holdoutmonths=self.params['holdoutmonths'])
-            
+
             print(f"\nTraining")
+            self.flow.log_status(logmessage=f"Training")
             self._train()
-            
+
             print(f"\nPredicting")
+            self.flow.log_status(logmessage="Predicting")
             pred = self._predict(self.df_holdout)
 
             y_valid = np.expm1(self.df_holdout[self.params['targetcol']])
             score = self._score(pred, y_valid)
             print(f"\nRMSE : {score}")
+            self.flow.log_status(logmessage=f"RMSE : {score}")
             scores[(fold, holdoutstart)] = score
 
             print("\nCalculating feature importance")
+            self.flow.log_status(logmessage="Calculating feature importance")
             imp = self._permutationimportance()
             imp['Holdout'] = fold
             dfimp = pd.concat([dfimp, imp], axis=0)
@@ -309,16 +336,17 @@ class PredFutureSales():
 
         self.flow.log_param("Holdout Scores", scores)
         self.flow.log_score("Error", "Average RMSE", np.mean(list(scores.values())))
-        self.flow.log_imp(dfimp, self.imppath)
+        self.flow.log_artefact(imp, "importance")
 
     def _finalize(self):
+        self.flow.log_status(logmessage="Finalizing Model to predict for Kaggle test set")
         self._timeseriessplit(trainstart=self.params['trainstart'], final=True)
         self._train()
 
     def kagglesubmit(self):
         """
         Save submission file in submissions folder and print command line argument
-        to be executed if we want to submit the results to kaggle 
+        to be executed if we want to submit the results to kaggle
         """
         kagglescore = np.NaN
 
@@ -348,6 +376,6 @@ class PredFutureSales():
             ### add multiple scores support to DeepFlow
         else:
             print("We'll submit the next run")
-    
+
     def endrun(self):
-        self.flow.end_run()
+        self.flow.log_status("Completed")
